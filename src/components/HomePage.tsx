@@ -110,9 +110,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               Paste &amp; Shorten URL
             </h2>
           </div>
-          <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
-            5s Protected Redirect
-          </span>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -340,28 +337,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Hero Header (Moved below shortening card) */}
-      <div className="text-center max-w-2xl mx-auto my-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-xs font-semibold mb-3">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Protected Countdown Redirection</span>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-2">
-          Shorten Links with{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
-            Mandatory Countdown
-          </span>
-        </h1>
-        <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed">
-          Create short, memorable links backed by a mandatory 5-second waiting page and real-time click analytics.
-        </p>
-      </div>
-
       {/* Ad Space */}
       <AdSpace slotId="ad-home-banner" size="banner" className="my-6" />
 
       {/* Recently Created Links Section */}
-      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 sm:p-6 shadow-xl mb-10">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-400" />
@@ -468,6 +448,23 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             })}
           </div>
         )}
+      </div>
+
+      {/* Hero Header (Moved to the very bottom) */}
+      <div className="text-center max-w-2xl mx-auto my-8">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-xs font-semibold mb-3">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Protected Countdown Redirection</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-2">
+          Shorten Links with{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+            Mandatory Countdown
+          </span>
+        </h1>
+        <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed">
+          Create short, memorable links backed by a mandatory 5-second waiting page and real-time click analytics.
+        </p>
       </div>
 
       {/* Footer Info */}
