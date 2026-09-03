@@ -1,0 +1,6 @@
+{
+  "name": "URL Shortener",
+  "description": "Fast URL shortener with a mandatory countdown redirect page and click statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

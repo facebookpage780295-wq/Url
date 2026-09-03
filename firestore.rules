@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /links/{shortCode} {
+      // Anyone can read links for redirection and stats
+      allow read: if true;
+      // Anyone can create a short link with initial 0 clicks
+      allow create: if request.resource.data.shortCode is string
+                    && request.resource.data.originalUrl is string
+                    && request.resource.data.clicks == 0;
+      // Anyone can increment click count during redirection
+      allow update: if true;
+      allow delete: if false;
+    }
+  }
+}
