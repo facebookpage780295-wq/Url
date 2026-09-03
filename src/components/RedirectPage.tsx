@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ShieldCheck, AlertTriangle, ExternalLink, ArrowLeft, Lock } from 'lucide-react';
 import { fetchLink, incrementLinkClicks, extractDomain } from '../services/linkService';
 import { AdSpace } from './AdSpace';
@@ -65,22 +65,65 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({ shortCode, onNavigat
     return () => clearInterval(interval);
   }, [loading, notFound, link]);
 
+  // Helper to execute redirect through multiple browser channels
+  const executeRedirect = useCallback(() => {
+    if (!link?.originalUrl) return;
+    const target = link.originalUrl;
+
+    // 1. Browser-native Meta refresh tag (bypasses many JS execution blocks)
+    try {
+      let meta = document.querySelector('meta[http-equiv="refresh"]') as HTMLMetaElement | null;
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.httpEquiv = 'refresh';
+        document.head.appendChild(meta);
+      }
+      meta.content = `0;url=${target}`;
+    } catch (e) {
+      console.warn('Meta refresh attempt failed:', e);
+    }
+
+    // 2. Programmatic anchor click (works better with browser navigation filters)
+    try {
+      const a = document.createElement('a');
+      a.href = target;
+      a.rel = 'noreferrer';
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      console.warn('Anchor click attempt failed:', e);
+    }
+
+    // 3. Standard Location replace & href
+    try {
+      window.location.replace(target);
+    } catch {
+      try {
+        window.location.href = target;
+      } catch (err) {
+        console.error('Direct window.location failed:', err);
+      }
+    }
+  }, [link]);
+
   // 3. Trigger redirect only when secondsRemaining === 0
   useEffect(() => {
-    if (secondsRemaining === 0 && link && !hasRedirected) {
+    if (secondsRemaining === 0 && link) {
       setHasRedirected(true);
-      // Small tick delay to let the UI reflect "0" and "Redirecting..." before navigating
-      const timeout = setTimeout(() => {
-        try {
-          window.location.href = link.originalUrl;
-        } catch (err) {
-          console.error('Redirect failed:', err);
-        }
-      }, 400);
 
-      return () => clearTimeout(timeout);
+      // Attempt immediate redirection
+      executeRedirect();
+
+      // Repeated retry every 1.5s in case Android Chrome or an ad-blocker blocked the initial background attempt
+      const retryInterval = setInterval(() => {
+        executeRedirect();
+      }, 1500);
+
+      return () => clearInterval(retryInterval);
     }
-  }, [secondsRemaining, link, hasRedirected]);
+  }, [secondsRemaining, link, executeRedirect]);
 
   // 4. Block keyboard shortcuts that could attempt to bypass the timer
   useEffect(() => {
@@ -217,12 +260,19 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({ shortCode, onNavigat
                   </span>
                 </>
               ) : (
-                <div className="flex flex-col items-center">
+                <a
+                  href={link.originalUrl}
+                  target="_top"
+                  rel="noopener noreferrer"
+                  onClick={() => executeRedirect()}
+                  className="flex flex-col items-center justify-center w-full h-full rounded-full cursor-pointer hover:bg-emerald-500/15 transition-colors p-2"
+                  title="Click to proceed"
+                >
                   <div className="h-6 w-6 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin mb-1" />
                   <span className="text-xs font-semibold text-emerald-400 tracking-wide">
-                    Redirecting...
+                    Tap to Open
                   </span>
-                </div>
+                </a>
               )}
             </div>
           </div>
@@ -239,7 +289,7 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({ shortCode, onNavigat
                   {secondsRemaining === 1 ? 'second' : 'seconds'}...
                 </>
               ) : (
-                <span className="text-emerald-400">Opening destination URL...</span>
+                <span className="text-emerald-400 font-medium">Opening destination URL...</span>
               )}
             </p>
 
@@ -250,6 +300,26 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({ shortCode, onNavigat
                 style={{ width: `${progressRatio * 100}%` }}
               />
             </div>
+
+            {/* Direct Touch Action Button when 0 seconds reached */}
+            {secondsRemaining === 0 && (
+              <div className="mt-6 flex flex-col items-center">
+                <a
+                  id="direct-open-btn"
+                  href={link.originalUrl}
+                  target="_top"
+                  rel="noopener noreferrer"
+                  onClick={() => executeRedirect()}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-zinc-950 font-bold text-base shadow-xl shadow-emerald-500/25 transition-all transform active:scale-95 animate-pulse"
+                >
+                  <span>Continue to Destination</span>
+                  <ExternalLink className="w-4 h-4 text-zinc-950 stroke-[2.5]" />
+                </a>
+                <p className="text-[12px] text-zinc-300 mt-2.5">
+                  If your mobile browser paused automatic redirect, tap the button above.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
