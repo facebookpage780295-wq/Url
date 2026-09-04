@@ -21,6 +21,7 @@ import {
   extractDomain 
 } from '../services/linkService';
 import { AdSpace } from './AdSpace';
+import { SeoContentSection } from './SeoContentSection';
 import type { ShortLink } from '../types';
 
 interface HomePageProps {
@@ -466,6 +467,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           Create short, memorable links backed by a mandatory 5-second waiting page and real-time click analytics.
         </p>
       </div>
+
+      {/* SEO Informational & FAQ Section */}
+      <SeoContentSection />
 
       {/* Footer Info */}
       <footer className="mt-12 text-center text-xs text-zinc-300 border-t border-zinc-800/80 pt-6">
